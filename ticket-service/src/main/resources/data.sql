@@ -1,3 +1,4 @@
+-- Record 1
 INSERT INTO ticket (id, customer_id, assigned_agent_id, subject, description, created_at, updated_at)
 VALUES (
     'd4e5f6a7-b8c9-0d1e-2f3a-4b5c6d7e8f90'::uuid,
