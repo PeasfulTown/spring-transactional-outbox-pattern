@@ -1,8 +1,11 @@
 package xyz.peasfultown.transactional_outbox.search_service.consumer;
 
+import com.rabbitmq.client.Channel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.support.AmqpHeaders;
+import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 import xyz.peasfultown.transactional_outbox.search_service.domain.Ticket;
 import xyz.peasfultown.transactional_outbox.search_service.service.TicketService;
@@ -19,7 +22,11 @@ public class TicketEventConsumer {
     )
     public void consumeTicketEvent(Ticket ticket) {
         log.info("received ticket event: {}", ticket);
-        ticketService.saveTicket(ticket);
+        try {
+            ticketService.saveTicket(ticket);
+        } catch (Exception e) {
+            log.error("unable to process ticket event", e);
+        }
         log.info("ticket saved in elasticsearch");
     }
 }

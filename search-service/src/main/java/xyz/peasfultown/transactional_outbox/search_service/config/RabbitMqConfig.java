@@ -1,9 +1,6 @@
 package xyz.peasfultown.transactional_outbox.search_service.config;
 
-import org.springframework.amqp.core.Binding;
-import org.springframework.amqp.core.BindingBuilder;
-import org.springframework.amqp.core.Queue;
-import org.springframework.amqp.core.TopicExchange;
+import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.DefaultClassMapper;
@@ -23,13 +20,32 @@ public class RabbitMqConfig {
     }
 
     @Bean
+    public DirectExchange exchange_dead() {
+        return new DirectExchange(RabbitMqConstants.exchange_dlq);
+    }
+
+    @Bean
     public Queue queue() {
-        return new Queue(RabbitMqConstants.queue);
+        Map<String, Object> arguments = Map.of(
+                "x-dead-letter-exchange", RabbitMqConstants.exchange_dlq,
+                "x-dead-letter-routing-key", RabbitMqConstants.routingKey_dead
+        );
+        return new Queue(RabbitMqConstants.queue, true, false, false, arguments);
+    }
+
+    @Bean
+    public Queue queue_dead() {
+        return new Queue(RabbitMqConstants.queue_dead);
     }
 
     @Bean
     public Binding binding(TopicExchange exchange, Queue queue) {
         return BindingBuilder.bind(queue).to(exchange).with(RabbitMqConstants.routingKey);
+    }
+
+    @Bean
+    public Binding binding_dead(DirectExchange exchange_dead, Queue queue_dead) {
+        return BindingBuilder.bind(queue_dead).to(exchange_dead).with(RabbitMqConstants.routingKey_dead);
     }
 
     @Bean
@@ -55,6 +71,5 @@ public class RabbitMqConfig {
         template.setMessageConverter(jsonConverter);
         return template;
     }
-
 
 }

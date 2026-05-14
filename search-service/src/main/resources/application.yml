@@ -14,7 +14,7 @@ rabbitmq:
   exchange: search-index
   queue: search-index-queue
   routing-key: search.update.ticket
-  dql:
+  dlq:
     exchange: search-index-dlx
     queue: search-index-dlq
     routing-key: search.update.ticket.dead
