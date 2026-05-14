@@ -1,0 +1,21 @@
+spring:
+
+  application:
+    name: search-service
+
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: user
+    password: password
+    virtual-host: outbox
+
+rabbitmq:
+  exchange: main
+  queue: outbox_queue
+  routing-key: outbox_routing_key
+
+logging:
+  level:
+    org.springframework.data.elasticsearch.core: DEBUG
+    org.apache.http: DEBUG
