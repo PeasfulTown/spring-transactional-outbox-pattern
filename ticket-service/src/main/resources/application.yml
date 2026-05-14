@@ -29,9 +29,9 @@ spring:
     virtual-host: outbox
 
 rabbitmq:
-  exchange: main
-  queue: outbox_queue
-  routing-key: outbox_routing_key
+  exchange: search-index
+  queue: search-index-queue
+  routing-key: search.update.ticket
 
 logging:
   level:
