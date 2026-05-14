@@ -1,0 +1,60 @@
+services:
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: outbox_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ticket
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - outbox_postgres_data:/var/lib/postgres/data
+    networks:
+      - outbox
+
+  rabbitmq:
+    image: rabbitmq:4-management-alpine
+    container_name: outbox_rabbitmq
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: user
+      RABBITMQ_DEFAULT_PASS: password
+      RABBITMQ_DEFAULT_VHOST: outbox
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - outbox_rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - outbox
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
+    container_name: outbox_elasticsearch
+    restart: unless-stopped
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - cluster.name=ticket_cluster
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    ports:
+      - "9200:9200"
+    volumes:
+      - outbox_es_data:/usr/share/elasticsearch/data
+    networks:
+      - outbox
+
+volumes:
+  outbox_postgres_data:
+  outbox_rabbitmq_data:
+  outbox_es_data:
+
+networks:
+  outbox:
