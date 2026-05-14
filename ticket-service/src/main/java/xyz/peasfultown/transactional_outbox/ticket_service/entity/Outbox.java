@@ -1,48 +1,45 @@
 package xyz.peasfultown.transactional_outbox.ticket_service.entity;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.JdbcType;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.dialect.PostgreSQLEnumJdbcType;
+import org.hibernate.type.SqlTypes;
 import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.Instant;
 import java.util.UUID;
 
 @Entity
-@Table(name = "ticket")
+@Table(name = "outbox")
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
 @EntityListeners(AuditingEntityListener.class)
-public class Ticket {
+public class Outbox {
     @Id
     @Column(name = "id", nullable = false, updatable = false)
     @Builder.Default
     private UUID id = UUID.randomUUID();
 
-    @Column(name = "customer_id", nullable = false)
+    @Column(name = "payload", columnDefinition = "JSONB", nullable = false)
+    @JdbcTypeCode(SqlTypes.JSON)
+    private JsonNode payload;
+
+    @Column(name = "status", columnDefinition = "outbox_status", nullable = false)
+    @Enumerated(EnumType.STRING)
+    @JdbcType(PostgreSQLEnumJdbcType.class)
     @Builder.Default
-    private UUID customerId = UUID.randomUUID();
-
-    @Column(name = "assigned_agent_id")
-    private UUID assignedAgentId;
-
-    @Column(name = "subject", nullable = false)
-    private String subject;
-
-    @Column(name = "description", columnDefinition = "TEXT", nullable = false)
-    private String description;
+    private OutboxStatus status = OutboxStatus.PENDING;
 
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
-
-    @LastModifiedDate
-    @Column(name = "updated_at", nullable = false)
-    private Instant updatedAt;
 }
